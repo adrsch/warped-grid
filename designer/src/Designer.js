@@ -4,9 +4,9 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import { createDistortedGridSvg, createDistortedGridSvgAnimated, svgLinearGradient } from './svg';
-import { createDistortedGridCtx, createDistortedGridCtxAnimated } from './ctx';
-import defaults from './defaults';
+import { createDistortedGridSvg, createDistortedGridSvgAnimated, svgLinearGradient } from '../../warped-grid/dist/svg';
+import { createDistortedGridCtx, createDistortedGridCtxAnimated } from '../../warped-grid/dist/ctx';
+import defaults from '../../warped-grid/dist/defaults';
 
 const Designer = ({ canvas, svg }) => {
   const [format, setFormat] = React.useState('svg');
