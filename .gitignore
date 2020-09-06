@@ -1,0 +1,7 @@
+*.swp
+*.swo
+*.tmp
+warped-grid/node_modules
+warped-grid/dist
+designer/node_modules
+designer/dist
