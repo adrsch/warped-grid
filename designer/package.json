@@ -31,7 +31,10 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "core-js": "^3.6.5",
+    "rc-color-picker": "^1.2.6",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-color": "^2.18.1",
+    "react-dom": "^16.13.1",
+    "react-linear-gradient-picker": "^1.1.3"
   }
 }

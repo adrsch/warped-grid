@@ -6,7 +6,7 @@ import defaults from './defaults';
 const svgBezier = makeBezier((cps, cpe, point) => (
   `C ${cps.x},${cps.y} ${cpe.x},${cpe.y} ${point.x},${point.y}`));
 
-const svgLine = (point) => `L ${point[0]} ${point[1]}`;
+const svgLine = (point) => `L ${point.x} ${point.y}`;
 
 const svgPath = (points, command, style) => {
   const d = points.reduce((acc, point, i, a) => (
