@@ -6,10 +6,10 @@ import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import { createDistortedGridSvg, createDistortedGridSvgAnimated, svgLinearGradient } from '../../warped-grid/dist/svg';
+import { SketchPicker } from 'react-color';
+import { createDistortedGridSvg } from '../../warped-grid/dist/svg';
 import { createDistortedGridCtx, createDistortedGridCtxAnimated } from '../../warped-grid/dist/ctx';
 import defaults from '../../warped-grid/dist/defaults';
-import { SketchPicker } from 'react-color';
 
 const Designer = ({ canvas, svg }) => {
   const [picker, setPicker] = React.useState(false);
@@ -33,7 +33,6 @@ const Designer = ({ canvas, svg }) => {
 
   const renderGrid = () => {
     if (Object.values(errors).reduce((acc, cur) => acc || cur, false)) return;
-
     if (format === 'svg') {
       canvas.width = 0;
       canvas.height = 0;
@@ -71,7 +70,7 @@ const Designer = ({ canvas, svg }) => {
         scale: Number(scale),
         intensity: Number(intensity),
         smoothing: Number(smoothing),
-        draw: (ctx) => { ctx.stroke(); },
+        draw: (_ctx) => { _ctx.stroke(); },
       });
     }
     if (format === 'animated' && !intervalId) {
@@ -90,7 +89,7 @@ const Designer = ({ canvas, svg }) => {
         scale: Number(scale),
         intensity: Number(intensity),
         smoothing: Number(smoothing),
-        draw: (ctx) => { ctx.stroke(); },
+        draw: (_ctx) => { _ctx.stroke(); },
         speed: Number(speed),
       });
       let time = 0;
@@ -104,7 +103,10 @@ const Designer = ({ canvas, svg }) => {
     }
   };
   const handleChangeFormat = (e) => {
-    setFormat(e.target.value);    
+    setFormat(e.target.value);
+    // Reset speed & remove errors from it
+    setSpeed(0.1);
+    setErrors({ ...errors, speed: false });
     if (intervalId) {
       clearInterval(intervalId);
       setIntervalId(false);
@@ -119,8 +121,8 @@ const Designer = ({ canvas, svg }) => {
     }
   };
 
-  const handleOpenPicker = (picker) => () => {
-    setPicker(picker);
+  const handleOpenPicker = (pickerName) => () => {
+    setPicker(pickerName);
   };
 
   const handleClosePicker = () => {
@@ -132,18 +134,18 @@ const Designer = ({ canvas, svg }) => {
   };
 
   const handleChangeNumber = (
-    name, 
-    setField, 
-    min = Number.MIN_SAFE_INTEGER, 
+    name,
+    setField,
+    min = Number.MIN_SAFE_INTEGER,
     max = Number.MAX_SAFE_INTEGER,
   ) => (e) => {
     setErrors({
       ...errors,
       [name]: (
-        isNaN(e.target.value) || 
-        e.target.value < min || 
-        e.target.value > max || 
-        e.target.value === ''
+        isNaN(e.target.value)
+        || e.target.value < min
+        || e.target.value > max
+        || e.target.value === ''
       ),
     });
     setField(e.target.value);
@@ -151,34 +153,50 @@ const Designer = ({ canvas, svg }) => {
       clearInterval(intervalId);
       setIntervalId(false);
     }
-  }
+  };
 
   renderGrid();
-//  React.useEffect(() => { renderGrid(); }, []);
+
+  const Spacer = (props) => <div > {props.children} </div>;
   return (
-    <div>
+    <div style={{ marginTop: '15px' }}>
       <FormControl component="fieldset">
         <FormLabel component="legend">Render as</FormLabel>
-        <RadioGroup aria-label="format" name="format" value={format} onChange={handleChangeFormat}>
+        <RadioGroup 
+          aria-label="format" 
+          name="format" 
+          value={format} 
+          onChange={handleChangeFormat}
+          style={{ margin: '5px' }}
+        >
           <FormControlLabel value="svg" control={<Radio />} label="Static (SVG)" />
           <FormControlLabel value="canvas" control={<Radio />} label="Static (PNG)" />
-          <FormControlLabel value="animated" control={<Radio />} label="Animated, not downloadable" />
+          <FormControlLabel value="animated" control={<Radio />} label="Animated" />
         </RadioGroup>
-        <TextField
+        {format === 'animated' && <TextField
           error={errors.speed}
           label="Speed"
           value={speed}
+          style={{ margin: '5px' }}
           onChange={handleChangeNumber('speed', setSpeed, 0, 1)}
-        />
+        />}
       </FormControl>
       <div>
+        <FormLabel
+          style={{ margin: '15px', marginLeft: '5px', marginBottom: '5px' }}
+          component="legend"
+        >
+          Grid
+        </FormLabel>
         <TextField
+          style={{ margin: '5px' }}
           error={errors.width}
           label="Width"
           value={width}
           onChange={handleChangeNumber('width', setWidth, 0, 10000)}
         />
         <TextField
+          style={{ margin: '5px' }}
           error={errors.height}
           label="Height"
           value={height}
@@ -187,12 +205,14 @@ const Designer = ({ canvas, svg }) => {
       </div>
       <div>
         <TextField
+          style={{ margin: '5px' }}
           error={errors.left}
           label="Offset from left"
           value={left}
           onChange={handleChangeNumber('left', setLeft, -10000, 10000)}
         />
         <TextField
+          style={{ margin: '5px' }}
           error={errors.top}
           label="Offset from top"
           value={top}
@@ -201,12 +221,14 @@ const Designer = ({ canvas, svg }) => {
       </div>
       <div>
         <TextField
+          style={{ margin: '5px' }}
           error={errors.ySpacing}
           label="Horizontal line spacing"
           value={ySpacing}
           onChange={handleChangeNumber('ySpacing', setYSpacing, 0)}
         />
         <TextField
+          style={{ margin: '5px' }}
           error={errors.xSpacing}
           label="Vertical line spacing"
           value={xSpacing}
@@ -214,27 +236,37 @@ const Designer = ({ canvas, svg }) => {
         />
       </div>
       <div>
+        <FormLabel
+          style={{ margin: '15px', marginLeft: '5px', marginBottom: '5px' }}
+          component="legend"
+        >
+          Warp
+        </FormLabel>
         <TextField
+          style={{ margin: '5px' }}
           error={errors.intensity}
-          label="Warp intensity"
+          label="Intensity"
           value={intensity}
           onChange={handleChangeNumber('intensity', setIntensity)}
         />
         <TextField
+          style={{ margin: '5px' }}
           error={errors.scale}
-          label="Warp scale"
+          label="Scale"
           value={scale}
           onChange={handleChangeNumber('scale', setScale)}
         />
       </div>
       <div>
         <TextField
+          style={{ margin: '5px' }}
           error={errors.pointSpacing}
           label="Warp anchor spacing"
           value={pointSpacing}
           onChange={handleChangeNumber('pointSpacing', setPointSpacing, 0)}
         />
         <TextField
+          style={{ margin: '5px' }}
           error={errors.smoothing}
           label="Line smoothing"
           value={smoothing}
@@ -242,39 +274,62 @@ const Designer = ({ canvas, svg }) => {
         />
       </div>
       <div>
-        <FormLabel component="legend">Colors</FormLabel>
-          <Button variant="outlined" onClick={handleOpenPicker('stroke')}>
+        <FormLabel
+          style={{ margin: '15px', marginLeft: '5px', marginBottom: '5px' }}
+          component="legend"
+        >
+          Colors
+        </FormLabel>
+        <Button
+          style={{ margin: '5px' }}
+          variant="outlined" 
+          onClick={handleOpenPicker('stroke')}
+        >
           Grid
           <div style={{
-            marginLeft: 10, 
-            width: 15, 
-            height: 15, 
-            backgroundColor: stroke
-          }}/>
-        </Button>
-        { picker === 'stroke' && <div>
-          <div 
-            onClick={handleClosePicker}
-            style={{position: 'fixed', top: '0px', left: '0px', bottom: '0px', right: '0px'}}
+            marginLeft: 10,
+            width: 15,
+            height: 15,
+            backgroundColor: stroke,
+          }}
           />
-          <SketchPicker color={stroke} onChange={handleChangeColor(setStroke)}/>
-        </div> }
-        <Button variant="outlined" onClick={handleOpenPicker('background')}>
+        </Button>
+        { picker === 'stroke' && (
+        <div>
+          <div
+            onClick={handleClosePicker}
+            style={{
+              position: 'fixed', top: '0px', left: '0px', bottom: '0px', right: '0px',
+            }}
+          />
+          <SketchPicker color={stroke} onChange={handleChangeColor(setStroke)} />
+        </div>
+        ) }
+        <Button
+          style={{ margin: '5px' }}
+          variant="outlined" 
+          onClick={handleOpenPicker('background')}
+        >
           Background
           <div style={{
-            marginLeft: 10, 
-            width: 15, 
-            height: 15, 
-            backgroundColor: background
-          }}/>
-        </Button>
-        { picker === 'background' && <div>
-          <div 
-            onClick={handleClosePicker}
-            style={{position: 'fixed', top: '0px', left: '0px', bottom: '0px', right: '0px'}}
+            marginLeft: 10,
+            width: 15,
+            height: 15,
+            backgroundColor: background,
+          }}
           />
-          <SketchPicker color={background} onChange={handleChangeColor(setBackground)}/>
-        </div> }
+        </Button>
+        { picker === 'background' && (
+        <div>
+          <div
+            onClick={handleClosePicker}
+            style={{
+              position: 'fixed', top: '0px', left: '0px', bottom: '0px', right: '0px',
+            }}
+          />
+          <SketchPicker color={background} onChange={handleChangeColor(setBackground)} />
+        </div>
+        ) }
       </div>
     </div>
   );

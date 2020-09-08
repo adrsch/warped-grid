@@ -12,7 +12,8 @@ devServer: {
 },
 plugins: [
     new HtmlWebpackPlugin({
-       filename: 'index.html',
+        filename: 'index.html',
+        title: 'Warped Grid Designer',
     })
 ],
 module: {
